@@ -1,0 +1,20 @@
+---
+- name: "{{ exporter_name }}: Create service discovery directories"
+  ansible.builtin.file:
+    path: "{{ exporter_file_sd_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  delegate_to: "{{ item }}"
+  loop: "{{ exporter_scrape_servers }}"
+
+- name: "{{ exporter_name }}: Register exporter with prometheus servers"
+  ansible.builtin.template:
+    src: target.yml
+    dest: "{{ exporter_file_sd_dir }}/{{ inventory_hostname }}.yml"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  delegate_to: "{{ item }}"
+  loop: "{{ exporter_scrape_servers }}"

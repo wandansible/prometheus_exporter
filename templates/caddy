@@ -1,0 +1,5 @@
+# {{ ansible_managed }}
+
+handle_path /{{ exporter_name }}/* {
+  reverse_proxy localhost:{{ exporter_port }}
+}

@@ -1,0 +1,94 @@
+---
+- name: "{{ exporter_name }}: Add system group"
+  ansible.builtin.group:
+    name: "{{ exporter_group }}"
+    system: true
+    state: present
+  when: exporter_manage_user
+
+- name: "{{ exporter_name }}: Add system user"
+  ansible.builtin.user:
+    name: "{{ exporter_user }}"
+    group: "{{ exporter_group }}"
+    groups: "{{ exporter_groups }}"
+    system: true
+    shell: /usr/sbin/nologin
+    home: "{{ exporter_src_dir }}"
+    createhome: false
+    state: present
+  when: exporter_manage_user
+
+- name: "{{ exporter_name }}: Create directories"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  loop:
+    - "{{ exporter_bin_dir }}"
+    - "{{ exporter_src_dir }}"
+
+- name: "{{ exporter_name }}: Get latest version"
+  ansible.builtin.uri:
+    url: "{{ exporter_latest_url }}"
+    method: GET
+    return_content: true
+    status_code: 200
+    body_format: json
+  register: _latest
+  when: exporter_version == "latest"
+
+- name: "{{ exporter_name }}: Use latest version"
+  ansible.builtin.set_fact:
+    _version: "{{ _latest.json.tag_name | regex_replace(exporter_version_regex, '\\1') }}"
+  when: exporter_version == "latest"
+
+- name: "{{ exporter_name }}: Use static version"
+  ansible.builtin.set_fact:
+    _version: "{{ exporter_version }}"
+  when: exporter_version != "latest"
+
+- name: "{{ exporter_name }}: Download archive"
+  ansible.builtin.get_url:
+    url: "{{ exporter_package_url }}"
+    dest: "{{ exporter_src_dir }}/{{ exporter_package }}.tar.gz"
+    checksum: >-
+      {{ exporter_checksum_type + ":" + 
+      ((lookup('url', exporter_checksums_url, wantlist=True) |
+      select('search', exporter_package + ".tar.gz"))[0].split(' ')[0] 
+      if exporter_checksum == "" else exporter_checksum) }}
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+
+- name: "{{ exporter_name }}: Create archive extraction directory"
+  ansible.builtin.file:
+    path: "{{ exporter_src_dir }}/{{ exporter_package_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  when: exporter_add_extract_dir
+
+- name: "{{ exporter_name }}: Extract package"
+  ansible.builtin.unarchive:
+    src: "{{ exporter_src_dir }}/{{ exporter_package }}.tar.gz"
+    remote_src: true
+    dest: >-
+      {{ exporter_src_dir + "/" + exporter_package_dir 
+      if exporter_add_extract_dir | bool else 
+      exporter_src_dir }}
+    creates: "{{ exporter_src_dir }}/{{ exporter_package_dir }}/{{ exporter_binary }}"
+    owner: root
+    group: root
+
+- name: "{{ exporter_name }}: Install binary"
+  ansible.builtin.copy:
+    src: "{{ exporter_src_dir }}/{{ exporter_package_dir }}/{{ exporter_binary }}"
+    remote_src: true
+    dest: "{{ exporter_bin_dir }}/{{ exporter_binary }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  notify: restart {{ exporter_service }}

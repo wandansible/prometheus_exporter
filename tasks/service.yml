@@ -1,0 +1,16 @@
+---
+- name: "{{ exporter_name }}: Add systemd service"
+  ansible.builtin.template:
+    src: systemd.service
+    dest: /etc/systemd/system/{{ exporter_service }}.service
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify: restart {{ exporter_service }}
+
+- name: "{{ exporter_name }}: Start and enable systemd service"
+  ansible.builtin.systemd:
+    name: "{{ exporter_service }}.service"
+    daemon_reload: yes
+    enabled: yes
+    state: started

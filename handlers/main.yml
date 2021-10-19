@@ -1,0 +1,10 @@
+---
+- name: restart {{ exporter_service }}
+  ansible.builtin.systemd:
+    name: "{{ exporter_service }}.service"
+    state: restarted
+
+- name: restart caddy
+  ansible.builtin.systemd:
+    name: caddy.service
+    state: restarted

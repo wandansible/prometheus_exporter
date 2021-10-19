@@ -1,0 +1,12 @@
+---
+- name:  "{{ exporter_name }}: Add exporter service"
+  ansible.builtin.import_tasks: service.yml
+  when: exporter_install | bool
+
+- name: "{{ exporter_name }}: Add caddy config"
+  ansible.builtin.import_tasks: caddy.yml
+  when: exporter_configure_caddy | bool
+
+- name: "{{ exporter_name }}: Register"
+  ansible.builtin.import_tasks: register.yml
+  when: exporter_register | bool

@@ -1,0 +1,9 @@
+---
+- name: "{{ exporter_name }}: Add caddy config"
+  ansible.builtin.template:
+    src: caddy
+    dest: /etc/caddy/exporters/{{ exporter_name }}
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  notify: restart caddy

@@ -1,0 +1,26 @@
+#jinja2: trim_blocks: "false", lstrip_blocks: "true"
+# {{ ansible_managed }}
+
+[Unit]
+Description={{ exporter_description }}
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User={{ exporter_user }}
+Group={{ exporter_group }}
+ExecStart={{ exporter_bin_dir }}/{{ exporter_binary }}{% if exporter_flags | length > 0 %} \
+    {% if exporter_flags is string %}
+    {{ exporter_flags | trim | indent(4, false) }}
+    {% else %}
+    {{ exporter_flags | join(' \\\n') | indent(4, false) }}
+    {% endif %}
+{% endif %}
+
+SyslogIdentifier={{ exporter_service }}
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target

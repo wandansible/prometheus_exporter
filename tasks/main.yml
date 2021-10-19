@@ -1,0 +1,6 @@
+---
+- name:  "{{ exporter_name }}: Run pre tasks"
+  ansible.builtin.import_tasks: pre.yml
+
+- name:  "{{ exporter_name }}: Run post tasks"
+  ansible.builtin.import_tasks: post.yml
