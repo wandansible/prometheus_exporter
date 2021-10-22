@@ -54,9 +54,9 @@
     url: "{{ exporter_package_url }}"
     dest: "{{ exporter_src_dir }}/{{ exporter_package }}.tar.gz"
     checksum: >-
-      {{ exporter_checksum_type + ":" + 
+      {{ exporter_checksum_type + ":" +
       ((lookup('url', exporter_checksums_url, wantlist=True) |
-      select('search', exporter_package + ".tar.gz"))[0].split(' ')[0] 
+      select('search', exporter_package + ".tar.gz"))[0].split(' ')[0]
       if exporter_checksum == "" else exporter_checksum) }}
     owner: root
     group: root
@@ -76,8 +76,8 @@
     src: "{{ exporter_src_dir }}/{{ exporter_package }}.tar.gz"
     remote_src: true
     dest: >-
-      {{ exporter_src_dir + "/" + exporter_package_dir 
-      if exporter_add_extract_dir | bool else 
+      {{ exporter_src_dir + "/" + exporter_package_dir
+      if exporter_add_extract_dir | bool else
       exporter_src_dir }}
     creates: "{{ exporter_src_dir }}/{{ exporter_package_dir }}/{{ exporter_binary }}"
     owner: root
