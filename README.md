@@ -36,7 +36,7 @@ Required vars:
 exporter_name: <string>  # Set this in task vars not defaults
 
 "{{ exporter_vars_prefix }}_port": <port>
-"{{ exporter_vars_prefix }}_flags": <string or list> 
+"{{ exporter_vars_prefix }}_flags": <string or list>
 
 # For example:
 exporter_name: node_exporter
@@ -76,7 +76,7 @@ Register vars:
 
 ```yaml
 # Global vars
-prometheus_labels: <dict> 
+prometheus_labels: <dict>
 prometheus_scrape_servers: <list>
 
 # Exporter specific vars

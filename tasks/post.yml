@@ -1,5 +1,5 @@
 ---
-- name:  "{{ exporter_name }}: Add exporter service"
+- name: "{{ exporter_name }}: Add exporter service"
   ansible.builtin.import_tasks: service.yml
   when: exporter_install | bool
 
