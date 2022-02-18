@@ -41,12 +41,12 @@
 
 - name: "{{ exporter_name }}: Use latest version"
   ansible.builtin.set_fact:
-    _version: "{{ _latest.json.tag_name | regex_replace(exporter_version_regex, '\\1') }}"
+    exporter_selected_version: "{{ _latest.json.tag_name | regex_replace(exporter_version_regex, '\\1') }}"
   when: exporter_version == "latest"
 
 - name: "{{ exporter_name }}: Use static version"
   ansible.builtin.set_fact:
-    _version: "{{ exporter_version }}"
+    exporter_selected_version: "{{ exporter_version }}"
   when: exporter_version != "latest"
 
 - name: "{{ exporter_name }}: Download archive"

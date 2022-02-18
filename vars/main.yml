@@ -7,9 +7,11 @@ exporter_default_arch_map:
   armv6l: armv6
 
 exporter_default_latest_url: https://api.github.com/repos/{{ exporter_git_org }}/{{ exporter_git_repo }}/releases/latest
-exporter_default_package: "{{ exporter_package_name }}-{{ _version }}.linux-{{ exporter_arch_map[ansible_architecture] }}"
-exporter_default_package_url: https://github.com/{{ exporter_git_org }}/{{ exporter_git_repo }}/releases/download/{{ exporter_tag }}/{{ exporter_package }}.tar.gz
-exporter_default_checksums_url: https://github.com/{{ exporter_git_org }}/{{ exporter_git_repo }}/releases/download/{{ exporter_tag }}/{{ exporter_checksums_file }}
+exporter_default_package: "{{ exporter_package_name }}-{{ exporter_selected_version }}.linux-{{ exporter_arch_map[ansible_architecture] }}"
+exporter_default_package_url: "https://github.com/{{ exporter_git_org }}/{{ exporter_git_repo }}/\
+  releases/download/{{ exporter_tag }}/{{ exporter_package }}.tar.gz"
+exporter_default_checksums_url: "https://github.com/{{ exporter_git_org }}/{{ exporter_git_repo }}/\
+  releases/download/{{ exporter_tag }}/{{ exporter_checksums_file }}"
 
 exporter_vars_prefix: "{{ exporter_name }}"
 
@@ -32,7 +34,7 @@ exporter_latest_url: "{{ lookup('vars', exporter_vars_prefix + '_latest_url', de
 
 exporter_version: "{{ lookup('vars', exporter_vars_prefix + '_version', default='latest') }}"
 exporter_version_regex: "{{ lookup('vars', exporter_vars_prefix + '_version_regex', default='^v?(.*)$') }}"
-exporter_tag: "{{ lookup('vars', exporter_vars_prefix + '_tag', default='v' + _version) }}"
+exporter_tag: "{{ lookup('vars', exporter_vars_prefix + '_tag', default='v' + exporter_selected_version) }}"
 exporter_package_name: "{{ lookup('vars', exporter_vars_prefix + '_package_name', default=exporter_git_repo) }}"
 exporter_package: "{{ lookup('vars', exporter_vars_prefix + '_package', default=exporter_default_package) }}"
 exporter_arch_map: "{{ lookup('vars', exporter_vars_prefix + '_arch_map', default=exporter_default_arch_map) }}"

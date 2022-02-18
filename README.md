@@ -56,7 +56,7 @@ Other useful vars:
 
 ```yaml
 # These may be necessary if format is slightly different to official Prometheus exporters
-"{{ exporter_vars_prefix }}_package": <string>  # Tarball package format (use '_version' to get latest version)
+"{{ exporter_vars_prefix }}_package": <string>  # Tarball package format (use 'exporter_selected_version' to get latest version)
 "{{ exporter_vars_prefix }}_checksums_file": <string>  # Checksums filename
 "{{ exporter_vars_prefix }}_add_extract_dir": <bool>  # Set to true if the package doesn't extract to a directory
 
