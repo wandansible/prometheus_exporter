@@ -3,7 +3,7 @@
 
 - targets:
     - {{ exporter_target }}
-{% if exporter_labels != [] %}
+{% if exporter_labels != {} %}
   labels:
     {{ exporter_labels | to_nice_yaml(indent=2) | indent(4, false) | trim }}
 {% endif %}
