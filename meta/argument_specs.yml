@@ -1,0 +1,26 @@
+---
+argument_specs:
+  main:
+    short_description: Base Prometheus exporter role
+    description: |
+      Handles all the common tasks associated with installing Prometheus exporters.
+      Prometheus exporter roles can be built on top of this and only need to provide
+      configuration specific to the exporter the role is for.
+    options:
+      prometheus_scrape_servers:
+        description: List of servers that scrape exporter metrics from the host
+        type: list
+        elements: str
+
+      prometheus_labels:
+        description: Labels added to exporter metrics
+        type: dict
+
+      exporter_name:
+        description: Name of the exporter
+        type: str
+        required: true
+
+      exporter_vars_prefix:
+        description: Prefix for the variables that override the base variables
+        type: str
