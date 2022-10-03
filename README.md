@@ -100,3 +100,160 @@ EXPORTER_NAME_scrape_servers: <list>
 ```
 
 `prometheus_exporter.caddy` must run before this role.
+
+Each exporter role must add the following definitions
+to their argument specs (`meta/argument_specs.yml`)
+and replace `EXPORTER_NAME` with the value you have assigned to `exporter_name`
+or `exporter_vars_prefix` if you have assigned a value to it:
+
+```yaml
+      EXPORTER_NAME_port:
+        description: Listen port
+        type: int
+        # default: <port>  # Set a default port
+
+      EXPORTER_NAME_file_sd_dir:
+        description: Directory, on scrape servers, for the file service discovery target
+        type: str
+        # default: <dir>  # Set a default directory
+
+      EXPORTER_NAME_scrape_servers:
+        description: |
+          List of servers that scrape exporter metrics from the host,
+          overrides prometheus_scrape_servers
+        type: list
+        elements: str
+
+      EXPORTER_NAME_labels:
+        description: |
+          Labels added to exporter metrics,
+          overrides prometheus_labels
+        type: dict
+
+      EXPORTER_NAME_install:
+        description: If true, install exporter
+        type: bool
+        default: true
+
+      EXPORTER_NAME_configure_caddy:
+        description: If true, configure caddy to add a TLS endpoint for the exporter
+        type: bool
+        default: true
+
+      EXPORTER_NAME_register:
+        description: If true, register the exporter with the scrape servers
+        type: bool
+        default: true
+
+      EXPORTER_NAME_user:
+        description: Name of the exporter unix user
+        type: str
+
+      EXPORTER_NAME_group:
+        description: Name of the exporter unix group
+        type: str
+
+      EXPORTER_NAME_groups:
+        description: Unix groups added to exporter unix user
+        type: list
+        elements: str
+
+      EXPORTER_NAME_manage_user:
+        description: If true, add exporter unix user and group
+        type: bool
+        default: true
+
+      EXPORTER_NAME_bin_dir:
+        description: Directory for the exporter executable
+        type: str
+
+      EXPORTER_NAME_src_dir:
+        description: Directory for the exporter downloads
+        type: str
+
+      EXPORTER_NAME_add_extract_dir:
+        description: If true, add an extraction directory for the exporter package
+        type: bool
+        default: false
+
+      EXPORTER_NAME_git_org:
+        description: Name of organisation for exporter git repository
+        type: str
+
+      EXPORTER_NAME_git_repo:
+        description: Name of exporter git repository
+        type: str
+
+      EXPORTER_NAME_latest_url:
+        description: URL for the latest version
+        type: str
+
+      EXPORTER_NAME_version:
+        description: Version to install (use "latest" for the latest version)
+        type: str
+        default: latest
+
+      EXPORTER_NAME_version_regex:
+        description: Regular expression for capturing the version from the latest tag
+        type: str
+
+      EXPORTER_NAME_tag:
+        description: Version git tag
+        type: str
+
+      EXPORTER_NAME_package_name:
+        description: Name of the exporter package
+        type: str
+
+      EXPORTER_NAME_package:
+        description: Filename of the exporter package (without extension)
+        type: str
+
+      EXPORTER_NAME_arch_map:
+        description: Mapping of the possible values of ansible_architecture to the exporter package architectures
+        type: dict
+
+      EXPORTER_NAME_package_url:
+        description: URL for the exporter package
+        type: str
+
+      EXPORTER_NAME_package_dir:
+        description: Directory the exporter package is extracted to
+        type: str
+
+      EXPORTER_NAME_binary:
+        description: Filename for the exporter executable
+        type: str
+
+      EXPORTER_NAME_checksums_url:
+        description: URL for the exporter package checksums
+        type: str
+
+      EXPORTER_NAME_checksums_file:
+        description: Filename for the exporter package checksums
+        type: str
+
+      EXPORTER_NAME_checksum_type:
+        description: The exporter package checksum type
+        type: str
+
+      EXPORTER_NAME_checksum:
+        description: The exporter package checksum
+        type: str
+
+      EXPORTER_NAME_service:
+        description: Name of the exporter systemd service
+        type: str
+
+      EXPORTER_NAME_description:
+        description: Description for the exporter systemd service
+        type: str
+
+      EXPORTER_NAME_flags:
+        description: Contents or list of flags to run exporter with
+        type: raw
+
+      EXPORTER_NAME_target:
+        description: Scrape target hostname and port
+        type: str
+```
