@@ -71,9 +71,9 @@ Other useful vars:
 
 ```yaml
 # These may be necessary if format is slightly different to official Prometheus exporters
-EXPORTER_NAME_package: <string>  # Tarball package format (use 'exporter_selected_version' to get latest version)
+EXPORTER_NAME_package: <string>         # Tarball package format (use 'exporter_selected_version' to get latest version)
 EXPORTER_NAME_checksums_file: <string>  # Checksums filename
-EXPORTER_NAME_add_extract_dir: <bool>  # Set to true if the package doesn't extract to a directory
+EXPORTER_NAME_add_extract_dir: <bool>   # Set to true if the package doesn't extract to a directory
 
 # Add basic auth users for all exporters
 caddy_basic_auth_users:
@@ -82,9 +82,9 @@ caddy_basic_auth_users:
     hash_scheme: <string>  # E.g. bcrypt
 
 # Control what the base role performs
-EXPORTER_NAME_install: <bool>  # Install exporter
+EXPORTER_NAME_install: <bool>          # Install exporter
 EXPORTER_NAME_configure_caddy: <bool>  # Add Caddy reverse proxy for exporter
-EXPORTER_NAME_register: <bool>  # Register exporter target with Prometheus servers
+EXPORTER_NAME_register: <bool>         # Register exporter target with Prometheus servers
 ```
 
 Register vars:
