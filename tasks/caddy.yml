@@ -1,4 +1,101 @@
 ---
+- name: Remove old caddy apt repository entry
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [signed-by=/usr/share/keyrings/caddy.gpg]
+      https://dl.cloudsmith.io/public/caddy/stable/deb/debian
+      any-version main
+    filename: caddy
+    update_cache: no
+    state: absent
+
+- name: Remove caddy apt signing key from /usr/share/keyrings
+  ansible.builtin.file:
+    path: /usr/share/keyrings/caddy.gpg
+    state: absent
+
+- name: Create apt keyrings directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+
+- name: Add caddy apt signing key
+  ansible.builtin.apt_key:
+    id: "{{ caddy_apt_key_fingerprint }}"
+    url: https://dl.cloudsmith.io/public/caddy/stable/gpg.key
+    keyring: /etc/apt/keyrings/caddy.gpg
+    state: present
+
+- name: Add caddy apt repository
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [signed-by=/etc/apt/keyrings/caddy.gpg]
+      https://dl.cloudsmith.io/public/caddy/stable/deb/debian
+      any-version main
+    filename: caddy
+    update_cache: yes
+    state: present
+
+- name: Install caddy
+  ansible.builtin.apt:
+    name: caddy
+    state: present
+
+- name: Create caddy exporters dir
+  ansible.builtin.file:
+    path: /etc/caddy/exporters
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+
+- name: Create caddy tls dir
+  ansible.builtin.file:
+    path: /etc/caddy/tls
+    state: directory
+    owner: root
+    group: caddy
+    mode: u=rwx,g=rx,o=
+  when:
+    - caddy_cert_file != ""
+    - caddy_key_file != ""
+
+- name: Copy tls cert
+  ansible.builtin.copy:
+    src: "{{ caddy_copy_cert }}"
+    remote_src: true
+    dest: "{{ caddy_cert_file }}"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  when:
+    - caddy_copy_cert != ""
+    - caddy_cert_file != ""
+
+- name: Copy tls key
+  ansible.builtin.copy:
+    src: "{{ caddy_copy_key }}"
+    remote_src: true
+    dest: "{{ caddy_key_file }}"
+    owner: root
+    group: caddy
+    mode: u=rw,g=r,o=
+  when:
+    - caddy_copy_key != ""
+    - caddy_key_file != ""
+
+- name: Add base caddy config
+  ansible.builtin.template:
+    src: Caddyfile
+    dest: /etc/caddy/Caddyfile
+    owner: root
+    group: caddy
+    mode: u=rw,g=r,o=
+  notify: restart caddy
+
 - name: "{{ exporter_name }}: Add caddy config"
   ansible.builtin.template:
     src: caddy
@@ -7,3 +104,9 @@
     group: root
     mode: u=rw,g=r,o=r
   notify: restart caddy
+
+- name: Start and enable caddy
+  ansible.builtin.service:
+    name: caddy
+    state: started
+    enabled: yes

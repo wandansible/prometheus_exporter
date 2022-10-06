@@ -1,3 +1,11 @@
 ---
 prometheus_scrape_servers: []
 prometheus_labels: {}
+
+caddy_apt_key_fingerprint: 65760C51EDEA2017CEA2CA15155B6D79CA56EA34
+caddy_listen: "{{ inventory_hostname }}:9095"
+caddy_copy_cert: ""
+caddy_copy_key: ""
+caddy_cert_file: ""
+caddy_key_file: ""
+caddy_basic_auth_users: []

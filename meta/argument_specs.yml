@@ -4,6 +4,9 @@ argument_specs:
     short_description: Base Prometheus exporter role
     description: |
       Handles all the common tasks associated with installing Prometheus exporters.
+      This includes installing and configuring Caddy as an HTTPS reverse proxy for
+      all prometheus exporters on a host, where each exporter role adds
+      their individual URL path and address/port for the reverse proxy.
       Prometheus exporter roles can be built on top of this and only need to provide
       configuration specific to the exporter the role is for.
     options:
@@ -23,4 +26,51 @@ argument_specs:
 
       exporter_vars_prefix:
         description: Prefix for the variables that override the base variables
+        type: str
+
+      caddy_listen:
+        description: Listen address and port
+        type: str
+        default: "{{ inventory_hostname }}:9095"
+
+      caddy_copy_cert:
+        description: Path for TLS cert to copy to caddy_cert_file
+        type: str
+
+      caddy_copy_key:
+        description: Path for TLS key to copy to caddy_key_file
+        type: str
+
+      caddy_cert_file:
+        description: |
+          Path for TLS cert,
+          leave empty to allow Caddy to handle TLS certs automatically
+        type: str
+
+      caddy_key_file:
+        description: |
+          Path for TLS key,
+          leave empty to allow Caddy to handle TLS certs automatically
+        type: str
+
+      caddy_basic_auth_users:
+        description: List of basic auth users allowed to access the endpoint
+        type: list
+        elements: dict
+        options:
+          username:
+            description: Username
+            type: str
+            required: true
+          hash_scheme:
+            description: Hash algorithm used for the password hash, e.g. bcrypt
+            type: str
+            required: true
+          hash:
+            description: Password hash
+            type: str
+            required: true
+
+      caddy_apt_key_fingerprint:
+        description: Fingerprint for caddy apt key
         type: str
