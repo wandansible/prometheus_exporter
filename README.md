@@ -19,9 +19,8 @@ Recommended include task
 
 ```yaml
 - name: Apply base prometheus exporter role
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: prometheus_exporter
-    public: true
   vars:
     exporter_name: EXPORTER_NAME
 ```
@@ -43,20 +42,38 @@ EXPORTER_NAME_port: <port>
 EXPORTER_NAME_flags: <string or list>
 ```
 
-Required vars example:
+You must also include a handler for restarting the exporter:
+
+```yaml
+# handlers/main.yml
+- name: restart EXPORTER_SERVICE
+  ansible.builtin.service:
+    name: EXPORTER_SERVICE
+    state: restarted
+```
+
+Note: replace `EXPORTER_SERVICE` with the value you have assigned to `exporter_name`
+or `EXPORTER_NAME_service` if you have assigned a value to it.
+
+Example of the required vars and handler:
 
 ```yaml
 # tasks/main.yml:
 - name: Apply base prometheus exporter role
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: prometheus_exporter
-    public: true
   vars:
     exporter_name: node_exporter
 
 # defaults/main.yml:
 node_exporter_port: 9100
 node_exporter_flags: "{{ lookup('template', 'flags') }}"
+
+# handlers/main.yml
+- name: restart node_exporter
+  ansible.builtin.service:
+    name: node_exporter
+    state: restarted
 ```
 
 Common vars:

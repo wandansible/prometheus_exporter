@@ -1,9 +1,4 @@
 ---
-- name: restart {{ exporter_service }}
-  ansible.builtin.service:
-    name: "{{ exporter_service }}.service"
-    state: restarted
-
 - name: restart caddy
   ansible.builtin.service:
     name: caddy.service
