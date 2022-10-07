@@ -116,8 +116,6 @@ EXPORTER_NAME_labels: <dict>
 EXPORTER_NAME_scrape_servers: <list>
 ```
 
-`prometheus_exporter.caddy` must run before this role.
-
 Each exporter role must add the following definitions
 to their argument specs (`meta/argument_specs.yml`)
 and replace `EXPORTER_NAME` with the value you have assigned to `exporter_name`

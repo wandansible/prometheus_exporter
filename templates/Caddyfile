@@ -1,0 +1,21 @@
+#jinja2: trim_blocks: "false", lstrip_blocks: "true"
+# {{ ansible_managed }}
+
+{% if caddy_cert_file != "" and caddy_key_file != "" %}
+{
+  auto_https off
+}
+{% endif %}
+{{ caddy_listen }}
+{% if caddy_cert_file != "" and caddy_key_file != "" %}
+tls {{ caddy_cert_file }} {{ caddy_key_file }}
+{% endif %}
+import /etc/caddy/exporters/*
+{% for _hash_scheme in caddy_basic_auth_users | map(attribute="hash_scheme") | unique %}
+
+basicauth * {{ _hash_scheme }} {
+  {% for _user in caddy_basic_auth_users | selectattr("hash_scheme", "equalto", _hash_scheme) %}
+  {{ _user.username }} {{ _user.hash | b64encode }}
+  {% endfor %}
+}
+{% endfor %}
