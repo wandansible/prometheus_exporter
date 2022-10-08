@@ -14,16 +14,19 @@ Other Prometheus exporter roles can be built on top of this for less duplicate A
 
 **How to use this role**
 
-Recommended include task
-(replace `EXPORTER_NAME` with the name of the exporter sub-role appended by `_exporter`):
+Inside your own prometheus exporter role you will need to include this role:
 
 ```yaml
+# tasks/main.yml:
 - name: Apply base prometheus exporter role
   ansible.builtin.import_role:
     name: prometheus_exporter
-  vars:
-    exporter_name: EXPORTER_NAME
+
+# vars/main.yml:
+exporter_name: EXPORTER_NAME
 ```
+
+Note: replace `EXPORTER_NAME` with the name of the exporter sub-role appended by `_exporter`.
 
 By default, `exporter_vars_prefix` will be set to `exporter_name`.
 Certain vars prefixed with `exporter_vars_prefix`
@@ -36,8 +39,10 @@ It is recommended to include these vars in `defaults`.
 Required vars:
 
 ```yaml
+# vars/main.yml:
 exporter_name: <string>  # Set this in task vars not defaults
 
+# defaults/main.yml:
 EXPORTER_NAME_port: <port>
 EXPORTER_NAME_flags: <string or list>
 ```
@@ -62,8 +67,9 @@ Example of the required vars and handler:
 - name: Apply base prometheus exporter role
   ansible.builtin.import_role:
     name: prometheus_exporter
-  vars:
-    exporter_name: node_exporter
+
+# vars/main.yml:
+exporter_name: node_exporter
 
 # defaults/main.yml:
 node_exporter_port: 9100
