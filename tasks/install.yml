@@ -13,7 +13,7 @@
     groups: "{{ exporter_groups }}"
     system: true
     shell: /usr/sbin/nologin
-    home: "{{ exporter_src_dir }}"
+    home: "{{ exporter_bin_dir }}"
     createhome: false
     state: present
   when: exporter_manage_user
@@ -29,66 +29,91 @@
     - "{{ exporter_bin_dir }}"
     - "{{ exporter_src_dir }}"
 
-- name: "{{ exporter_name }}: Get latest version"
+- name: "{{ exporter_name }}: Get GitHub release information"
   ansible.builtin.uri:
-    url: "{{ exporter_latest_url }}"
+    url: >-
+      {{ "https://api.github.com/repos/" + exporter_git_org + "/" + exporter_git_repo + "/releases"
+         + ("/tags" if exporter_version != "latest" else "") }}/{{ exporter_version }}
     method: GET
     return_content: true
     status_code: 200
     body_format: json
-  register: _latest
-  when: exporter_version == "latest"
+  register: _release_info
+  when: exporter_archive_url == ''
 
-- name: "{{ exporter_name }}: Use latest version"
+- name: "{{ exporter_name }}: Get archive URL from GitHub release"
   ansible.builtin.set_fact:
-    exporter_selected_version: "{{ _latest.json.tag_name | regex_replace(exporter_version_regex, '\\1') }}"
-  when: exporter_version == "latest"
+    _exporter_archive_github_url: >-
+      {{ _release_info.json.assets
+         | selectattr("name", "search", exporter_binary, ignorecase=true)
+         | selectattr("name", "search", "linux", ignorecase=true)
+         | selectattr("name", "search", exporter_arch_map[ansible_architecture], ignorecase=true)
+         | map(attribute='browser_download_url')
+         | first }}
+  when: exporter_archive_url == ''
 
-- name: "{{ exporter_name }}: Use static version"
+- name: "{{ exporter_name }}: Get checksum URL from GitHub release"
   ansible.builtin.set_fact:
-    exporter_selected_version: "{{ exporter_version }}"
-  when: exporter_version != "latest"
+    _exporter_checksum_github_url: >-
+      {{ _release_info.json.assets
+         | selectattr("name", "equalto", exporter_checksum_file)
+         | map(attribute='browser_download_url')
+         | first }}
+  when:
+    - exporter_archive_url == ''
+    - exporter_checksum_url == ''
+
+- name: "{{ exporter_name }}: Set download URLs"
+  ansible.builtin.set_fact:
+    _exporter_archive_url: >-
+      {{ exporter_archive_url if exporter_archive_url else _exporter_archive_github_url }}
+    _exporter_checksum_url: >-
+      {{ exporter_checksum_url if exporter_checksum_url else _exporter_checksum_github_url }}
+
+- name: "{{ exporter_name }}: Set archive filename"
+  ansible.builtin.set_fact:
+    _exporter_archive_filename: "{{ _exporter_archive_url | split('/') | last }}"
 
 - name: "{{ exporter_name }}: Download archive"
   ansible.builtin.get_url:
-    url: "{{ exporter_package_url }}"
-    dest: "{{ exporter_src_dir }}/{{ exporter_package }}.tar.gz"
+    url: "{{ _exporter_archive_url }}"
+    dest: "{{ exporter_src_dir }}/{{ _exporter_archive_filename }}"
     checksum: >-
       {{ exporter_checksum_type + ":" +
-      ((lookup('url', exporter_checksums_url, wantlist=True) |
-      select('search', exporter_package + ".tar.gz"))[0].split(' ')[0]
+      (lookup('url', _exporter_checksum_url, wantlist=True)
+      | select('search', _exporter_archive_filename) | first | default("") | split(' ') | first
       if exporter_checksum == "" else exporter_checksum) }}
     owner: root
     group: root
     mode: u=rw,g=r,o=r
 
-- name: "{{ exporter_name }}: Create archive extraction directory"
-  ansible.builtin.file:
-    path: "{{ exporter_src_dir }}/{{ exporter_package_dir }}"
-    state: directory
-    owner: root
-    group: root
-    mode: u=rwx,g=rx,o=rx
-  when: exporter_add_extract_dir
-
 - name: "{{ exporter_name }}: Extract package"
   ansible.builtin.unarchive:
-    src: "{{ exporter_src_dir }}/{{ exporter_package }}.tar.gz"
+    src: "{{ exporter_src_dir }}/{{ _exporter_archive_filename }}"
     remote_src: true
-    dest: >-
-      {{ exporter_src_dir + "/" + exporter_package_dir
-      if exporter_add_extract_dir | bool else
-      exporter_src_dir }}
-    creates: "{{ exporter_src_dir }}/{{ exporter_package_dir }}/{{ exporter_binary }}"
+    dest: "{{ exporter_bin_dir }}"
+    extra_opts:
+      - "--strip-components={{ exporter_strip_components }}"
+      - "--wildcards"
+      - "--no-anchored"
+      - "{{ exporter_binary }}"
     owner: root
     group: root
-
-- name: "{{ exporter_name }}: Install binary"
-  ansible.builtin.copy:
-    src: "{{ exporter_src_dir }}/{{ exporter_package_dir }}/{{ exporter_binary }}"
-    remote_src: true
-    dest: "{{ exporter_bin_dir }}/{{ exporter_binary }}"
-    owner: root
-    group: root
-    mode: u=rwx,g=rx,o=rx
   notify: restart {{ exporter_service }}
+
+- name: Get downloaded archive files
+  ansible.builtin.find:
+    paths: "{{ exporter_src_dir }}"
+    patterns: "{{ '*' + _exporter_archive_filename | splitext | last }}"
+  register: _exporter_src_archives
+
+- name: Remove older downloaded archive files
+  ansible.builtin.file:
+    path: "{{ item['path'] }}"
+    state: absent
+  loop: "{{ _exporter_src_archives['files'] }}"
+  loop_control:
+    label: "{{ item['path'] }}"
+  when:
+    - "item['path'] | basename != _exporter_archive_filename"
+    - "exporter_clean_src_dir"

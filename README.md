@@ -96,7 +96,7 @@ Other useful vars:
 # These may be necessary if format is slightly different to official Prometheus exporters
 EXPORTER_NAME_package: <string>         # Tarball package format (use 'exporter_selected_version' to get latest version)
 EXPORTER_NAME_checksums_file: <string>  # Checksums filename
-EXPORTER_NAME_add_extract_dir: <bool>   # Set to true if the package doesn't extract to a directory
+EXPORTER_NAME_strip_components: <int>   # May need to change this if src tarball doesn't contain a directory
 
 # Add basic auth users for all exporters
 caddy_basic_auth_users:
@@ -159,12 +159,12 @@ or `exporter_vars_prefix` if you have assigned a value to it:
       EXPORTER_NAME_configure_caddy:
         description: If true, configure caddy to add a TLS endpoint for the exporter
         type: bool
-        default: true
+        default: false
 
       EXPORTER_NAME_register:
         description: If true, register the exporter with the scrape servers
         type: bool
-        default: true
+        default: false
 
       EXPORTER_NAME_user:
         description: Name of the exporter unix user
@@ -189,13 +189,18 @@ or `exporter_vars_prefix` if you have assigned a value to it:
         type: str
 
       EXPORTER_NAME_src_dir:
-        description: Directory for the exporter downloads
+        description: Directory for the downloaded exporter src archive
         type: str
 
-      EXPORTER_NAME_add_extract_dir:
-        description: If true, add an extraction directory for the exporter package
+      EXPORTER_NAME_strip_components:
+        description: Strip NUMBER leading components from file names on extraction
+        type: int
+        default: 1
+
+      EXPORTER_NAME_clean_src_dir:
+        description: Remove old downloaded archive files from exporter src directory
         type: bool
-        default: false
+        default: true
 
       EXPORTER_NAME_git_org:
         description: Name of organisation for exporter git repository
@@ -205,8 +210,8 @@ or `exporter_vars_prefix` if you have assigned a value to it:
         description: Name of exporter git repository
         type: str
 
-      EXPORTER_NAME_latest_url:
-        description: URL for the latest version
+      EXPORTER_NAME_archive_url:
+        description: Override the URL for the exporter archive file
         type: str
 
       EXPORTER_NAME_version:
@@ -214,43 +219,19 @@ or `exporter_vars_prefix` if you have assigned a value to it:
         type: str
         default: latest
 
-      EXPORTER_NAME_version_regex:
-        description: Regular expression for capturing the version from the latest tag
-        type: str
-
-      EXPORTER_NAME_tag:
-        description: Version git tag
-        type: str
-
-      EXPORTER_NAME_package_name:
-        description: Name of the exporter package
-        type: str
-
-      EXPORTER_NAME_package:
-        description: Filename of the exporter package (without extension)
-        type: str
-
       EXPORTER_NAME_arch_map:
         description: Mapping of the possible values of ansible_architecture to the exporter package architectures
         type: dict
-
-      EXPORTER_NAME_package_url:
-        description: URL for the exporter package
-        type: str
-
-      EXPORTER_NAME_package_dir:
-        description: Directory the exporter package is extracted to
-        type: str
 
       EXPORTER_NAME_binary:
         description: Filename for the exporter executable
         type: str
 
-      EXPORTER_NAME_checksums_url:
-        description: URL for the exporter package checksums
+      EXPORTER_NAME_checksum_url:
+        description: Override the URL for the exporter checksum file
         type: str
 
-      EXPORTER_NAME_checksums_file:
+      EXPORTER_NAME_checksum_file:
         description: Filename for the exporter package checksums
         type: str
 

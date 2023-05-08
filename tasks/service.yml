@@ -11,6 +11,6 @@
 - name: "{{ exporter_name }}: Start and enable systemd service"
   ansible.builtin.systemd:
     name: "{{ exporter_service }}.service"
-    daemon_reload: yes
-    enabled: yes
+    daemon_reload: true
+    enabled: true
     state: started
