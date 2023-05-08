@@ -6,7 +6,7 @@
       https://dl.cloudsmith.io/public/caddy/stable/deb/debian
       any-version main
     filename: caddy
-    update_cache: no
+    update_cache: false
     state: absent
 
 - name: Remove caddy apt signing key from /usr/share/keyrings
@@ -36,7 +36,7 @@
       https://dl.cloudsmith.io/public/caddy/stable/deb/debian
       any-version main
     filename: caddy
-    update_cache: yes
+    update_cache: true
     state: present
 
 - name: Install caddy
@@ -109,4 +109,4 @@
   ansible.builtin.service:
     name: caddy
     state: started
-    enabled: yes
+    enabled: true
