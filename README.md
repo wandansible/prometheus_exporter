@@ -159,12 +159,12 @@ or `exporter_vars_prefix` if you have assigned a value to it:
       EXPORTER_NAME_configure_caddy:
         description: If true, configure caddy to add a TLS endpoint for the exporter
         type: bool
-        default: true
+        default: false
 
       EXPORTER_NAME_register:
         description: If true, register the exporter with the scrape servers
         type: bool
-        default: true
+        default: false
 
       EXPORTER_NAME_user:
         description: Name of the exporter unix user
