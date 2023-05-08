@@ -1,4 +1,5 @@
 ---
 - name: "{{ exporter_name }}: Install exporter"
-  ansible.builtin.import_tasks: install.yml
+  ansible.builtin.include_tasks:
+    file: install.yml
   when: exporter_install | bool
