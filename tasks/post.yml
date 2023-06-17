@@ -2,7 +2,9 @@
 - name: "{{ exporter_name }}: Add exporter service"
   ansible.builtin.include_tasks:
     file: service.yml
-  when: exporter_install | bool
+  when:
+    - exporter_install | bool
+    - exporter_service != ""
 
 - name: "{{ exporter_name }}: Install and configure caddy"
   ansible.builtin.include_tasks:

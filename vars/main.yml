@@ -35,25 +35,29 @@ exporter_strip_components: >-
 exporter_clean_src_dir: >-
   {{ lookup('vars', exporter_vars_prefix + '_clean_src_dir', default=true) }}
 
-exporter_git_org: "{{ lookup('vars', exporter_vars_prefix + '_git_org', default='prometheus') }}"
-exporter_git_repo: "{{ lookup('vars', exporter_vars_prefix + '_git_repo', default=exporter_name) }}"
+exporter_github_org: >-
+  {{ lookup('vars', exporter_vars_prefix + '_github_org', default='') }}
+exporter_github_repo: >-
+  {{ lookup('vars', exporter_vars_prefix + '_github_repo', default=exporter_name) }}
+exporter_github_checksum_filename: >-
+  {{ lookup('vars', exporter_vars_prefix + '_github_checksum_filename', default='sha256sums.txt') }}
 
-exporter_archive_url: "{{ lookup('vars', exporter_vars_prefix + '_archive_url', default='') }}"
-exporter_checksum_url: "{{ lookup('vars', exporter_vars_prefix + '_checksum_url', default='') }}"
+exporter_archive_urls: "{{ lookup('vars', exporter_vars_prefix + '_archive_urls', default=[]) }}"
 
 exporter_version: "{{ lookup('vars', exporter_vars_prefix + '_version', default='latest') }}"
 exporter_arch_map: >-
   {{ lookup('vars', exporter_vars_prefix + '_arch_map', default=exporter_default_arch_map) }}
 exporter_binary: >-
-  {{ lookup('vars', exporter_vars_prefix + '_binary', default=exporter_git_repo) }}
+  {{ lookup('vars', exporter_vars_prefix + '_binary', default=exporter_name) }}
 
-exporter_checksum_file: >-
-  {{ lookup('vars', exporter_vars_prefix + '_checksum_file', default='sha256sums.txt') }}
+exporter_checksum_url: "{{ lookup('vars', exporter_vars_prefix + '_checksum_url', default='') }}"
 exporter_checksum_type: >-
   {{ lookup('vars', exporter_vars_prefix + '_checksum_type', default='sha256') }}
-exporter_checksum: "{{ lookup('vars', exporter_vars_prefix + '_checksum', default='') }}"
+exporter_checksums: "{{ lookup('vars', exporter_vars_prefix + '_checksums', default='') }}"
 
 exporter_service: "{{ lookup('vars', exporter_vars_prefix + '_service', default=exporter_name) }}"
+exporter_handler: >-
+  {{ lookup('vars', exporter_vars_prefix + '_handler', default='restart ' + exporter_name) }}
 exporter_description: >-
   {{ lookup('vars',
             exporter_vars_prefix + '_description',
