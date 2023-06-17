@@ -86,17 +86,17 @@ Common vars:
 
 ```yaml
 # These will be necessary for non-official Prometheus exporters
-EXPORTER_NAME_git_org: <string>
-EXPORTER_NAME_git_repo: <string>
+EXPORTER_NAME_github_org: <string>
+EXPORTER_NAME_github_repo: <string>
 ```
 
 Other useful vars:
 
 ```yaml
 # These may be necessary if format is slightly different to official Prometheus exporters
-EXPORTER_NAME_package: <string>         # Tarball package format (use 'exporter_selected_version' to get latest version)
-EXPORTER_NAME_checksums_file: <string>  # Checksums filename
-EXPORTER_NAME_strip_components: <int>   # May need to change this if src tarball doesn't contain a directory
+EXPORTER_NAME_binary: <string>              # Name of exporter binary
+EXPORTER_NAME_checksums_filename: <string>  # Checksums filename
+EXPORTER_NAME_strip_components: <int>       # May need to change this if src tarball doesn't contain a directory
 
 # Add basic auth users for all exporters
 caddy_basic_auth_users:
@@ -202,17 +202,22 @@ or `exporter_vars_prefix` if you have assigned a value to it:
         type: bool
         default: true
 
-      EXPORTER_NAME_git_org:
-        description: Name of organisation for exporter git repository
+      EXPORTER_NAME_github_org:
+        description: Name of organisation for exporter github repository
         type: str
 
-      EXPORTER_NAME_git_repo:
-        description: Name of exporter git repository
+      EXPORTER_NAME_github_repo:
+        description: Name of exporter github repository
         type: str
 
-      EXPORTER_NAME_archive_url:
-        description: Override the URL for the exporter archive file
+      EXPORTER_NAME_github_checksum_filename:
+        description: Filename for the exporter package checksums file on github
         type: str
+
+      EXPORTER_NAME_archive_urls:
+        description: Override the list of exporter archive urls for different platforms and architectures
+        type: list
+        elements: str
 
       EXPORTER_NAME_version:
         description: Version to install (use "latest" for the latest version)
@@ -231,16 +236,12 @@ or `exporter_vars_prefix` if you have assigned a value to it:
         description: Override the URL for the exporter checksum file
         type: str
 
-      EXPORTER_NAME_checksum_file:
-        description: Filename for the exporter package checksums
-        type: str
-
       EXPORTER_NAME_checksum_type:
         description: The exporter package checksum type
         type: str
 
-      EXPORTER_NAME_checksum:
-        description: The exporter package checksum
+      EXPORTER_NAME_checksums:
+        description: Override exporter archive checksums file contents
         type: str
 
       EXPORTER_NAME_service:

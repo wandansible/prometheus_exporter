@@ -29,60 +29,90 @@
     - "{{ exporter_bin_dir }}"
     - "{{ exporter_src_dir }}"
 
-- name: "{{ exporter_name }}: Get GitHub release information"
-  ansible.builtin.uri:
-    url: >-
-      {{ "https://api.github.com/repos/" + exporter_git_org + "/" + exporter_git_repo + "/releases"
-         + ("/tags" if exporter_version != "latest" else "") }}/{{ exporter_version }}
-    method: GET
-    return_content: true
-    status_code: 200
-    body_format: json
-  register: _release_info
-  when: exporter_archive_url == ''
-
-- name: "{{ exporter_name }}: Get archive URL from GitHub release"
-  ansible.builtin.set_fact:
-    _exporter_archive_github_url: >-
-      {{ _release_info.json.assets
-         | selectattr("name", "search", exporter_binary, ignorecase=true)
-         | selectattr("name", "search", "linux", ignorecase=true)
-         | selectattr("name", "search", exporter_arch_map[ansible_architecture], ignorecase=true)
-         | map(attribute='browser_download_url')
-         | first }}
-  when: exporter_archive_url == ''
-
-- name: "{{ exporter_name }}: Get checksum URL from GitHub release"
-  ansible.builtin.set_fact:
-    _exporter_checksum_github_url: >-
-      {{ _release_info.json.assets
-         | selectattr("name", "equalto", exporter_checksum_file)
-         | map(attribute='browser_download_url')
-         | first }}
+- name: "{{ exporter_name }}: Get exporter URLs from GitHub release"
   when:
-    - exporter_archive_url == ''
-    - exporter_checksum_url == ''
+    - exporter_github_org != ""
+    - exporter_github_repo != ""
+  block:
+    - name: "{{ exporter_name }}: Get GitHub release information"
+      ansible.builtin.uri:
+        url: >-
+          {{ "https://api.github.com/repos/" + exporter_github_org + "/" + exporter_github_repo
+             + "/releases"
+             + ("/tags" if exporter_version != "latest" else "") + "/" + exporter_version }}
+        method: GET
+        return_content: true
+        status_code: 200
+        body_format: json
+      register: _release_info
 
-- name: "{{ exporter_name }}: Set download URLs"
+    - name: "{{ exporter_name }}: Get archive URL from GitHub release"
+      ansible.builtin.set_fact:
+        _exporter_archive_url: >-
+          {{ _release_info.json.assets
+             | selectattr("name", "search", exporter_binary, ignorecase=true)
+             | selectattr("name", "search", "linux", ignorecase=true)
+             | selectattr("name", "search", exporter_arch_map[ansible_architecture], ignorecase=true)
+             | map(attribute='browser_download_url')
+             | first
+             | default(None) }}
+      when: exporter_archive_urls | length == 0
+
+    - name: "{{ exporter_name }}: Get checksum URL from GitHub release"
+      ansible.builtin.set_fact:
+        _exporter_checksum_url: >-
+          {{ _release_info.json.assets
+             | selectattr("name", "equalto", exporter_github_checksum_filename)
+             | map(attribute='browser_download_url')
+             | first
+             | default(None) }}
+      when:
+        - exporter_checksum_url == ""
+        - exporter_checksums == ""
+
+- name: "{{ exporter_name }}: Get archive URL from variable"
   ansible.builtin.set_fact:
     _exporter_archive_url: >-
-      {{ exporter_archive_url if exporter_archive_url else _exporter_archive_github_url }}
-    _exporter_checksum_url: >-
-      {{ exporter_checksum_url if exporter_checksum_url else _exporter_checksum_github_url }}
+      {{ exporter_archive_urls
+         | select("search", exporter_binary, ignorecase=true)
+         | select("search", "linux", ignorecase=true)
+         | select("search", exporter_arch_map[ansible_architecture], ignorecase=true)
+         | first
+         | default(None) }}
+  when: exporter_archive_urls | length >= 1
 
 - name: "{{ exporter_name }}: Set archive filename"
   ansible.builtin.set_fact:
     _exporter_archive_filename: "{{ _exporter_archive_url | split('/') | last }}"
 
+- name: "{{ exporter_name }}: Set archive checksum URL from variable"
+  ansible.builtin.set_fact:
+    _exporter_checksum_url: "{{ exporter_checksum_url }}"
+  when:
+    - exporter_checksum_url != ""
+
+- name: "{{ exporter_name }}: Get archive checksum from URL"
+  ansible.builtin.set_fact:
+    _exporter_archive_checksum: >-
+      {{ lookup('url', _exporter_checksum_url, wantlist=True)
+         | select('search', _exporter_archive_filename)
+         | first | default('') | split(' ') | first | default(None) }}
+  when:
+    - _exporter_checksum_url | default("") != ""
+    - exporter_checksums == ""
+
+- name: "{{ exporter_name }}: Get archive checksum from variable"
+  ansible.builtin.set_fact:
+    _exporter_archive_checksum: "{{ exporter_checksums | split('\n') |
+      select('search', _exporter_archive_filename)
+      | first | default('') | split(' ') | first | default(None) }}"
+  when: exporter_checksums != ""
+
 - name: "{{ exporter_name }}: Download archive"
   ansible.builtin.get_url:
     url: "{{ _exporter_archive_url }}"
     dest: "{{ exporter_src_dir }}/{{ _exporter_archive_filename }}"
-    checksum: >-
-      {{ exporter_checksum_type + ":" +
-      (lookup('url', _exporter_checksum_url, wantlist=True)
-      | select('search', _exporter_archive_filename) | first | default("") | split(' ') | first
-      if exporter_checksum == "" else exporter_checksum) }}
+    checksum: "{{ exporter_checksum_type }}:{{ _exporter_archive_checksum }}"
     owner: root
     group: root
     mode: u=rw,g=r,o=r
@@ -117,3 +147,10 @@
   when:
     - "item['path'] | basename != _exporter_archive_filename"
     - "exporter_clean_src_dir"
+
+- name: Unset local variables
+  ansible.builtin.set_fact:
+    _exporter_archive_url: ""
+    _exporter_checksum_url: ""
+    _exporter_archive_filename: ""
+    _exporter_archive_checksum: ""
