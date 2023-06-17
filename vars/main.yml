@@ -54,6 +54,8 @@ exporter_checksum_type: >-
 exporter_checksum: "{{ lookup('vars', exporter_vars_prefix + '_checksum', default='') }}"
 
 exporter_service: "{{ lookup('vars', exporter_vars_prefix + '_service', default=exporter_name) }}"
+exporter_handler: >-
+  {{ lookup('vars', exporter_vars_prefix + '_handler', default='restart ' + exporter_name) }}
 exporter_description: >-
   {{ lookup('vars',
             exporter_vars_prefix + '_description',

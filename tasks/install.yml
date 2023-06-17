@@ -99,7 +99,7 @@
       - "{{ exporter_binary }}"
     owner: root
     group: root
-  notify: restart {{ exporter_service }}
+  notify: "{{ exporter_handler }}"
 
 - name: Get downloaded archive files
   ansible.builtin.find:

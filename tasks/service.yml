@@ -6,7 +6,7 @@
     owner: root
     group: root
     mode: u=rw,g=r,o=r
-  notify: restart {{ exporter_service }}
+  notify: "{{ exporter_handler }}"
 
 - name: "{{ exporter_name }}: Start and enable systemd service"
   ansible.builtin.systemd:
