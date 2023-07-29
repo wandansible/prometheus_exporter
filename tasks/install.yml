@@ -117,7 +117,7 @@
     group: root
     mode: u=rw,g=r,o=r
 
-- name: "{{ exporter_name }}: Extract package"
+- name: "{{ exporter_name }}: Extract binary from archive"
   ansible.builtin.unarchive:
     src: "{{ exporter_src_dir }}/{{ _exporter_archive_filename }}"
     remote_src: true

@@ -10,6 +10,7 @@ After=network-online.target
 Type=simple
 User={{ exporter_user }}
 Group={{ exporter_group }}
+ExecReload=/bin/kill -HUP ${MAINPID}
 ExecStart={{ exporter_bin_dir }}/{{ exporter_binary }}{% if exporter_flags | length > 0 %} \
     {% if exporter_flags is string %}
     {{ exporter_flags | trim | indent(4, false) }}
@@ -18,9 +19,19 @@ ExecStart={{ exporter_bin_dir }}/{{ exporter_binary }}{% if exporter_flags | len
     {% endif %}
 {% endif %}
 
+Restart=on-failure
+RestartSec=10s
+TimeoutStopSec=20s
+SendSIGKILL=no
+
 SyslogIdentifier={{ exporter_service }}
-Restart=always
-RestartSec=1
+
+NoNewPrivileges=yes
+ProtectHome=true
+ProtectSystem=strict
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=yes
 
 [Install]
 WantedBy=multi-user.target
