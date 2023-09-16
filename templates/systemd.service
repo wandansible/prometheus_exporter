@@ -13,9 +13,9 @@ Group={{ exporter_group }}
 ExecReload=/bin/kill -HUP ${MAINPID}
 ExecStart={{ exporter_bin_dir }}/{{ exporter_binary }}{% if exporter_flags | length > 0 %} \
     {% if exporter_flags is string %}
-    {{ exporter_flags | trim | indent(4, false) }}
+    {{ exporter_flags | trim | indent(4) }}
     {% else %}
-    {{ exporter_flags | join(' \\\n') | indent(4, false) }}
+    {{ exporter_flags | join(' \\\n') | indent(4) }}
     {% endif %}
 {% endif %}
 
