@@ -248,6 +248,10 @@ or `exporter_vars_prefix` if you have assigned a value to it:
         description: Name of the exporter systemd service
         type: str
 
+      EXPORTER_NAME_service_unit_file:
+        description: Contents of the systemd unit file for the exporter
+        type: str
+
       EXPORTER_NAME_handler:
         description: Name of the exporter handler to notify
         type: str

@@ -1,4 +1,6 @@
-#jinja2: trim_blocks: "false", lstrip_blocks: "true"
+{% if exporter_service_unit_file is defined %}
+{{ exporter_service_unit_file }}
+{%- else %}
 # {{ ansible_managed }}
 [Unit]
 Description={{ exporter_description }}
@@ -49,3 +51,4 @@ SystemCallArchitectures=native
 
 [Install]
 WantedBy=multi-user.target
+{% endif %}
