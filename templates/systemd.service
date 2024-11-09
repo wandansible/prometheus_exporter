@@ -1,8 +1,14 @@
-#jinja2: trim_blocks: "false", lstrip_blocks: "true"
+{% if exporter_service_unit_file is defined %}
+{{ exporter_service_unit_file }}
+{%- else %}
 # {{ ansible_managed }}
-
 [Unit]
 Description={{ exporter_description }}
+
+ConditionFileIsExecutable={{ exporter_bin_dir }}/{{ exporter_binary }}
+
+StartLimitIntervalSec=0
+
 Wants=network-online.target
 After=network-online.target
 
@@ -10,14 +16,10 @@ After=network-online.target
 Type=simple
 User={{ exporter_user }}
 Group={{ exporter_group }}
+EnvironmentFile=-/etc/default/{{ exporter_service }}
+ExecStart={{ exporter_bin_dir }}/{{ exporter_binary }} \
+          $EXPORTER_ARGS
 ExecReload=/bin/kill -HUP ${MAINPID}
-ExecStart={{ exporter_bin_dir }}/{{ exporter_binary }}{% if exporter_flags | length > 0 %} \
-    {% if exporter_flags is string %}
-    {{ exporter_flags | trim | indent(4) }}
-    {% else %}
-    {{ exporter_flags | join(' \\\n') | indent(4) }}
-    {% endif %}
-{% endif %}
 
 Restart=on-failure
 RestartSec=10s
@@ -26,12 +28,27 @@ SendSIGKILL=no
 
 SyslogIdentifier={{ exporter_service }}
 
-NoNewPrivileges=yes
-ProtectHome=true
-ProtectSystem=strict
+AmbientCapabilities=
+CapabilityBoundingSet=
+DeviceAllow=/dev/null rw
+DevicePolicy=strict
+LimitMEMLOCK=0
+LockPersonality=true
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
+PrivateDevices=true
+PrivateTmp=true
+PrivateUsers=true
 ProtectControlGroups=true
+ProtectHome=true
 ProtectKernelModules=true
-ProtectKernelTunables=yes
+ProtectKernelTunables=true
+ProtectSystem=full
+RemoveIPC=true
+RestrictNamespaces=true
+RestrictRealtime=true
+SystemCallArchitectures=native
 
 [Install]
 WantedBy=multi-user.target
+{% endif %}
