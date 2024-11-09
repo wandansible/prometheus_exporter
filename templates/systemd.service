@@ -1,8 +1,12 @@
 #jinja2: trim_blocks: "false", lstrip_blocks: "true"
 # {{ ansible_managed }}
-
 [Unit]
 Description={{ exporter_description }}
+
+ConditionFileIsExecutable={{ exporter_bin_dir }}/{{ exporter_binary }}
+
+StartLimitIntervalSec=0
+
 Wants=network-online.target
 After=network-online.target
 
@@ -22,12 +26,26 @@ SendSIGKILL=no
 
 SyslogIdentifier={{ exporter_service }}
 
-NoNewPrivileges=yes
-ProtectHome=true
-ProtectSystem=strict
+AmbientCapabilities=
+CapabilityBoundingSet=
+DeviceAllow=/dev/null rw
+DevicePolicy=strict
+LimitMEMLOCK=0
+LockPersonality=true
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
+PrivateDevices=true
+PrivateTmp=true
+PrivateUsers=true
 ProtectControlGroups=true
+ProtectHome=true
 ProtectKernelModules=true
-ProtectKernelTunables=yes
+ProtectKernelTunables=true
+ProtectSystem=full
+RemoveIPC=true
+RestrictNamespaces=true
+RestrictRealtime=true
+SystemCallArchitectures=native
 
 [Install]
 WantedBy=multi-user.target
