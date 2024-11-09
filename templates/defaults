@@ -1,0 +1,9 @@
+#jinja2: trim_blocks: "false", lstrip_blocks: "true"
+# {{ ansible_managed }}
+
+EXPORTER_ARGS='
+{% if exporter_flags is string %}
+{{ exporter_flags | trim }}
+{% else %}
+{{ exporter_flags | join("\n") }}
+{% endif %}'

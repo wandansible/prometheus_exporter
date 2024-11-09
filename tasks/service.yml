@@ -6,11 +6,23 @@
     owner: root
     group: root
     mode: u=rw,g=r,o=r
+  register: _unit_file
+  notify: "{{ exporter_handler }}"
+
+- name: "{{ exporter_name }}: Add defaults file"
+  ansible.builtin.template:
+    src: defaults
+    dest: /etc/default/{{ exporter_service }}
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  register: _defaults_file
   notify: "{{ exporter_handler }}"
 
 - name: "{{ exporter_name }}: Start and enable systemd service"
   ansible.builtin.systemd:
     name: "{{ exporter_service }}.service"
-    daemon_reload: true
+    daemon_reload: >-
+      {{ true if _unit_file is changed or _defaults_file is changed else false }}
     enabled: true
     state: started

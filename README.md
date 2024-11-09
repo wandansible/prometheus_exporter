@@ -257,7 +257,7 @@ or `exporter_vars_prefix` if you have assigned a value to it:
         type: str
 
       EXPORTER_NAME_flags:
-        description: Contents or list of flags to run exporter with
+        description: List of flags to run exporter with, as string or list
         type: raw
 
       EXPORTER_NAME_target:
