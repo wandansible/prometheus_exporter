@@ -30,19 +30,35 @@
     - "{{ exporter_src_dir }}"
 
 - name: "{{ exporter_name }}: Get GitHub release information"
-  ansible.builtin.uri:
-    url: >-
-      {{ "https://api.github.com/repos/" + exporter_github_org + "/" + exporter_github_repo
-         + "/releases"
-         + ("/tags" if exporter_version != "latest" else "") + "/" + exporter_version }}
-    method: GET
-    return_content: true
-    status_code: 200
-    body_format: json
-  register: _release_info
+  run_once: true
+  delegate_to: localhost
+  delegate_facts: true
   when:
     - exporter_github_org != ""
     - exporter_github_repo != ""
+    - "'github_' + exporter_vars_prefix + '_release_info' not in hostvars['localhost']['ansible_facts']"
+  block:
+    - name: "{{ exporter_name }}: Get GitHub release information"
+      ansible.builtin.uri:
+        url: >-
+          {{ "https://api.github.com/repos/" + exporter_github_org + "/" + exporter_github_repo
+             + "/releases"
+             + ("/tags" if exporter_version != "latest" else "") + "/" + exporter_version }}
+        method: GET
+        return_content: true
+        status_code: 200
+        body_format: json
+        headers: >-
+          {{ {"authorization": "Bearer {{ exporter_github_token }}"}
+             if exporter_github_token != "" else {} }}
+      retries: 6
+      delay: 15
+      register: _release_info
+
+    - name: Cache GitHub release information
+      ansible.builtin.set_fact:
+        "github_{{ exporter_vars_prefix }}_release_info": "{{ _release_info.json }}"
+        cacheable: true
 
 - name: Download release archive
   vars:
@@ -55,7 +71,7 @@
          | first
          | default(None) }}
       {%- else -%}
-      {{ _release_info.json.assets
+      {{ hostvars["localhost"]["ansible_facts"]["github_" + exporter_vars_prefix + "_release_info"].assets
          | selectattr("name", "search", exporter_binary, ignorecase=true)
          | selectattr("name", "search", "linux", ignorecase=true)
          | selectattr("name", "search", exporter_arch_map[ansible_architecture], ignorecase=true)
@@ -65,7 +81,7 @@
       {%- endif %}
     _exporter_checksum_url: >-
       {% if exporter_checksum_url == "" and exporter_checksums == "" -%}
-      {{ _release_info.json.assets
+      {{ hostvars["localhost"]["ansible_facts"]["github_" + exporter_vars_prefix + "_release_info"].assets
          | selectattr("name", "equalto", exporter_github_checksum_filename)
          | map(attribute="browser_download_url")
          | first
@@ -94,6 +110,8 @@
         owner: root
         group: root
         mode: u=rw,g=r,o=r
+      retries: 6
+      delay: 15
 
     - name: "{{ exporter_name }}: Extract binary from archive"
       ansible.builtin.unarchive:

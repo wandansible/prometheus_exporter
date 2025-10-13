@@ -39,6 +39,8 @@ exporter_github_org: >-
   {{ lookup('vars', exporter_vars_prefix + '_github_org', default='') }}
 exporter_github_repo: >-
   {{ lookup('vars', exporter_vars_prefix + '_github_repo', default=exporter_name) }}
+exporter_github_token: >-
+  {{ lookup('vars', exporter_vars_prefix + '_github_token', default="") }}
 exporter_github_checksum_filename: >-
   {{ lookup('vars', exporter_vars_prefix + '_github_checksum_filename', default='sha256sums.txt') }}
 
