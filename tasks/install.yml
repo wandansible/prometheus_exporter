@@ -49,7 +49,7 @@
         status_code: 200
         body_format: json
         headers: >-
-          {{ {"authorization": "Bearer {{ exporter_github_token }}"}
+          {{ {"Authorization": "Bearer " + exporter_github_token}
              if exporter_github_token != "" else {} }}
       retries: 6
       delay: 15
