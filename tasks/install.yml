@@ -54,6 +54,7 @@
       retries: 6
       delay: 15
       register: _release_info
+      check_mode: false
 
     - name: Cache GitHub release information
       ansible.builtin.set_fact:
@@ -125,6 +126,7 @@
           - "{{ exporter_binary }}"
         owner: root
         group: root
+      ignore_errors: "{{ ansible_check_mode }}"
       notify: "{{ exporter_handler }}"
 
     - name: Get downloaded archive files
