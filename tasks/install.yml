@@ -4,7 +4,7 @@
     name: "{{ exporter_group }}"
     system: true
     state: present
-  when: exporter_manage_user
+  when: exporter_manage_user | bool
 
 - name: "{{ exporter_name }}: Add system user"
   ansible.builtin.user:
@@ -16,7 +16,7 @@
     home: "{{ exporter_bin_dir }}"
     createhome: false
     state: present
-  when: exporter_manage_user
+  when: exporter_manage_user | bool
 
 - name: "{{ exporter_name }}: Create directories"
   ansible.builtin.file:
@@ -144,4 +144,4 @@
         label: "{{ item['path'] }}"
       when:
         - "item['path'] | basename != _exporter_archive_filename"
-        - "exporter_clean_src_dir"
+        - "exporter_clean_src_dir | bool"
