@@ -229,7 +229,7 @@ or `exporter_vars_prefix` if you have assigned a value to it:
         default: latest
 
       EXPORTER_NAME_arch_map:
-        description: Mapping of the possible values of ansible_architecture to the exporter package architectures
+        description: Mapping of the possible values of ansible_facts.architecture to the exporter package architectures
         type: dict
 
       EXPORTER_NAME_binary:
