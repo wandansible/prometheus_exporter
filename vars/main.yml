@@ -44,6 +44,7 @@ exporter_github_token: >-
 exporter_github_checksum_filename: >-
   {{ lookup('vars', exporter_vars_prefix + '_github_checksum_filename', default='sha256sums.txt') }}
 
+exporter_archive_extension: "{{ lookup('vars', exporter_vars_prefix + '_archive_extension', default='tar.gz') }}"
 exporter_archive_urls: "{{ lookup('vars', exporter_vars_prefix + '_archive_urls', default=[]) }}"
 
 exporter_version: "{{ lookup('vars', exporter_vars_prefix + '_version', default='latest') }}"

@@ -218,6 +218,11 @@ or `exporter_vars_prefix` if you have assigned a value to it:
         description: Filename for the exporter package checksums file on github
         type: str
 
+      EXPORTER_NAME_archive_extension:
+        description: File extension for the exporter archive
+        type: str
+        default: tar.gz
+
       EXPORTER_NAME_archive_urls:
         description: Override the list of exporter archive urls for different platforms and architectures
         type: list
