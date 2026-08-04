@@ -93,19 +93,31 @@
       {{ exporter_checksum_url }}
       {%- endif %}
     _exporter_archive_filename: "{{ _exporter_archive_url | split('/') | last }}"
-    _exporter_archive_checksum: >-
-      {% if _exporter_checksum_url | default("") != "" and exporter_checksums == "" -%}
-      {{ lookup("url", _exporter_checksum_url, wantlist=True)
-         | select("search", _exporter_archive_filename)
-         | first | default("") | split(" ") | first | default(None) }}
-      {%- elif exporter_checksums != "" -%}
-      {% set _exporter_checksum_list = exporter_checksums | split('\n') -%}
-      {{ _exporter_checksum_list
-         | select("search", "\s"+_exporter_archive_filename+"$")
-         | first | default("") | split(" ") | first | default(None) }}
-      {%- endif %}
   block:
+    - name: "{{ exporter_name }}: Get archive checksums"
+      ansible.builtin.uri:
+        url: "{{ _exporter_checksum_url }}"
+        return_content: true
+      register: _exporter_archive_checksums
+      retries: 6
+      delay: 15
+      when:
+        - _exporter_checksum_url | default("") != ""
+        - exporter_checksums == ""
+
     - name: "{{ exporter_name }}: Download archive"
+      vars:
+        _exporter_archive_checksum: >-
+          {% if _exporter_archive_checksums is not skipped -%}
+          {{ _exporter_archive_checksums.content.splitlines()
+             | select("search", _exporter_archive_filename)
+             | first | default("") | split(" ") | first | default(None) }}
+          {%- elif exporter_checksums != "" -%}
+          {% set _exporter_checksum_list = exporter_checksums | split('\n') -%}
+          {{ _exporter_checksum_list
+             | select("search", "\s"+_exporter_archive_filename+"$")
+             | first | default("") | split(" ") | first | default(None) }}
+          {%- endif %}
       ansible.builtin.get_url:
         url: "{{ _exporter_archive_url }}"
         dest: "{{ exporter_src_dir }}/{{ _exporter_archive_filename }}"
