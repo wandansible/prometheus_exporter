@@ -85,7 +85,7 @@
     _exporter_checksum_url: >-
       {% if exporter_checksum_url == "" and exporter_checksums == "" -%}
       {{ hostvars["localhost"].ansible_facts["github_" + exporter_vars_prefix + "_release_info"].assets
-         | selectattr("name", "equalto", exporter_github_checksum_filename)
+         | selectattr("name", "equalto", exporter_checksum_filename)
          | map(attribute="browser_download_url")
          | first
          | default(None) }}

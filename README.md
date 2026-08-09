@@ -214,7 +214,7 @@ or `exporter_vars_prefix` if you have assigned a value to it:
         description: Optional bearer token to use to authenticate with api.github.com
         type: str
 
-      EXPORTER_NAME_github_checksum_filename:
+      EXPORTER_NAME_checksum_filename:
         description: Filename for the exporter package checksums file on github
         type: str
 
